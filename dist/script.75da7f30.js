@@ -117,44 +117,143 @@ parcelRequire = (function (modules, cache, entry, globalName) {
   }
 
   return newRequire;
-})({"main.js":[function(require,module,exports) {
-var dt = new Date();
+})({"script.js":[function(require,module,exports) {
+var nav = 0;
+var clicked = null;
+var events = localStorage.getItem('events') ? JSON.parse(localStorage.getItem('events')) : [];
+var calendar = document.getElementById('calendar');
+var newEventModal = document.getElementById('newEventModal');
+var deleteEventModal = document.getElementById('deleteEventModal');
+var backDrop = document.getElementById('modalBackDrop');
+var eventTitleInput = document.getElementById('eventTitleInput');
+var weekdays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
-function renderDate() {
-  dt.setDate(1);
-  var day = dt.getDay();
-  var today = new Date();
-  var endDate = new Date(dt.getFullYear(), dt.getMonth() + 1, 0).getDate();
-  var prevDate = new Date(dt.getFullYear(), dt.getMonth(), 0).getDate();
-  var months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-  document.getElementById("month").innerHTML = months[dt.getMonth()];
-  document.getElementById("date_str").innerHTML = dt.toDateString();
-  var cells = "";
+function openModal(date) {
+  clicked = date;
+  var eventForDay = events.find(function (e) {
+    return e.date === clicked;
+  });
 
-  for (x = day; x > 0; x--) {
-    cells += "<div class='prev_date'>" + (prevDate - x + 1) + "</div>";
+  if (eventForDay) {
+    document.getElementById('eventText').innerText = eventForDay.title;
+    deleteEventModal.style.display = 'block';
+  } else {
+    newEventModal.style.display = 'block';
   }
 
-  console.log(day);
-
-  for (i = 1; i <= endDate; i++) {
-    if (i == today.getDate() && dt.getMonth() == today.getMonth()) cells += "<div class='today'>" + i + "</div>";else cells += "<div>" + i + "</div>";
-  }
-
-  document.getElementsByClassName("days")[0].innerHTML = cells;
+  backDrop.style.display = 'block';
 }
 
-document.onload = renderDate();
+function load() {
+  var dt = new Date();
 
-function moveDate(para) {
-  if (para == "prev") {
-    dt.setMonth(dt.getMonth() - 1);
-  } else if (para == 'next') {
-    dt.setMonth(dt.getMonth() + 1);
+  if (nav !== 0) {
+    dt.setMonth(new Date().getMonth() + nav);
   }
 
-  renderDate();
+  var day = dt.getDate();
+  var month = dt.getMonth();
+  var year = dt.getFullYear();
+  var firstDayOfMonth = new Date(year, month, 1);
+  var daysInMonth = new Date(year, month + 1, 0).getDate();
+  var dateString = firstDayOfMonth.toLocaleDateString('en-us', {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'numeric',
+    day: 'numeric'
+  });
+  var paddingDays = weekdays.indexOf(dateString.split(', ')[0]);
+  document.getElementById('monthDisplay').innerText = "".concat(dt.toLocaleDateString('en-us', {
+    month: 'long'
+  }), " ").concat(year);
+  calendar.innerHTML = '';
+
+  var _loop = function _loop(i) {
+    var daySquare = document.createElement('div');
+    daySquare.classList.add('day');
+    var dayString = "".concat(month + 1, "/").concat(i - paddingDays, "/").concat(year);
+
+    if (i > paddingDays) {
+      daySquare.innerText = i - paddingDays;
+      var eventForDay = events.find(function (e) {
+        return e.date === dayString;
+      });
+
+      if (i - paddingDays === day && nav === 0) {
+        daySquare.id = 'currentDay';
+      }
+
+      if (eventForDay) {
+        var eventDiv = document.createElement('div');
+        eventDiv.classList.add('event');
+        eventDiv.innerText = eventForDay.title;
+        daySquare.appendChild(eventDiv);
+      }
+
+      daySquare.addEventListener('click', function () {
+        return openModal(dayString);
+      });
+    } else {
+      daySquare.classList.add('padding');
+    }
+
+    calendar.appendChild(daySquare);
+  };
+
+  for (var i = 1; i <= paddingDays + daysInMonth; i++) {
+    _loop(i);
+  }
 }
+
+function closeModal() {
+  eventTitleInput.classList.remove('error');
+  newEventModal.style.display = 'none';
+  deleteEventModal.style.display = 'none';
+  backDrop.style.display = 'none';
+  eventTitleInput.value = '';
+  clicked = null;
+  load();
+}
+
+function saveEvent() {
+  if (eventTitleInput.value) {
+    eventTitleInput.classList.remove('error');
+    events.push({
+      date: clicked,
+      title: eventTitleInput.value
+    });
+    localStorage.setItem('events', JSON.stringify(events));
+    closeModal();
+  } else {
+    eventTitleInput.classList.add('error');
+  }
+}
+
+function deleteEvent() {
+  events = events.filter(function (e) {
+    return e.date !== clicked;
+  });
+  localStorage.setItem('events', JSON.stringify(events));
+  closeModal();
+}
+
+function initButtons() {
+  document.getElementById('nextButton').addEventListener('click', function () {
+    nav++;
+    load();
+  });
+  document.getElementById('backButton').addEventListener('click', function () {
+    nav--;
+    load();
+  });
+  document.getElementById('saveButton').addEventListener('click', saveEvent);
+  document.getElementById('cancelButton').addEventListener('click', closeModal);
+  document.getElementById('deleteButton').addEventListener('click', deleteEvent);
+  document.getElementById('closeButton').addEventListener('click', closeModal);
+}
+
+initButtons();
+load();
 },{}],"../../../AppData/Roaming/npm/node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
@@ -183,7 +282,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "56874" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "55959" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
@@ -359,5 +458,5 @@ function hmrAcceptRun(bundle, id) {
     return true;
   }
 }
-},{}]},{},["../../../AppData/Roaming/npm/node_modules/parcel-bundler/src/builtins/hmr-runtime.js","main.js"], null)
-//# sourceMappingURL=/main.1f19ae8e.js.map
+},{}]},{},["../../../AppData/Roaming/npm/node_modules/parcel-bundler/src/builtins/hmr-runtime.js","script.js"], null)
+//# sourceMappingURL=/script.75da7f30.js.map

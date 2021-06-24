@@ -1,42 +1,56 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
+  <head>
     <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calendar</title>
-    <link rel="stylesheet" href="/style.e308ff8e.css" type="text/css" media="all">    
-    <script src="/main.1f19ae8e.js"></script>
-<script src="/style.e308ff8e.js"></script></head>
-<body onload="renderDate()">
-    <div class="wrapper">
-        <div class="calendar">
-            <div class="month">
-                <div class="prev" id=".prev" onclick="moveDate('prev')">
-                    <span>&#10094;</span>
-                </div>
-                <div>
-                    <h2 id="month"></h2>
-                    <p id="date_str"></p>
-                </div>
-                <div class="next" id=".next" onclick="moveDate('next')">
-                    <span>&#10095;</span>
-                </div>
-            </div>
-            <div class="weekdays">
-                <div>Sun</div>
-                <div>Mon</div>
-                <div>Tue</div>
-                <div>Wed</div>
-                <div>Thu</div>
-                <div>Fri</div>
-                <div>Sat</div>
-            </div>
-            <div class="days">
+    <title>Calendar App</title>
 
-            </div>
+    <link rel="stylesheet" href="/style.e308ff8e.css">
+  <script src="/style.e308ff8e.js"></script></head>
+  <body>
+    
+    <div id="container">
+      <div id="header">
+        <div id="monthDisplay"></div>
+        <div>
+          <button id="backButton">Back</button>
+          <button id="nextButton">Next</button>
         </div>
+      </div>
+
+      <div id="weekdays">
+        <div>Sunday</div>
+        <div>Monday</div>
+        <div>Tuesday</div>
+        <div>Wednesday</div>
+        <div>Thursday</div>
+        <div>Friday</div>
+        <div>Saturday</div>
+      </div>
+
+      <div id="calendar"></div>
     </div>
-    <script src="/main.1f19ae8e.js"></script>
-</body>
+
+    <div id="newEventModal">
+      <h2>New Event</h2>
+
+      <input id="eventTitleInput" placeholder="Event Title">
+
+      <button id="saveButton">Save</button>
+      <button id="cancelButton">Cancel</button>
+    </div>
+
+    <div id="deleteEventModal">
+      <h2>Event</h2>
+
+      <p id="eventText"></p>
+
+      <button id="deleteButton">Delete</button>
+      <button id="closeButton">Close</button>
+    </div>
+
+    <div id="modalBackDrop"></div>
+
+    <script src="/script.75da7f30.js"></script>
+  </body>
 </html>
